@@ -86,14 +86,19 @@ jobs:
           RESPONSE=$(curl -sS -X GET \
             'https://uploader-mvp.xguardianplatform.io/get_apps_total?token='"${API_TOKEN}"'' \
             -H 'accept: application/json')
-          # Analisar a resposta JSON em busca do APP_NAME
-          APP_ID=$(echo "$RESPONSE" | jq -r '.[] | select(.name == "'"${APP_NAME}"'") | .id')
+          # Debug: Print the response structure
+          echo "Response structure:"
+          echo "$RESPONSE" | jq '.'
+            
+          # Try to parse the response and find the app
+          APP_ID=$(echo "$RESPONSE" | jq -r --arg NAME "$APP_NAME" '.apps[] | select(.name == $NAME) | .id')
+          
           if [ -z "$APP_ID" ]; then
             echo "Aplicação com nome '${APP_NAME}' não encontrada."
             exit 1
           fi
           echo "ID da aplicação: $APP_ID"
-          echo "APP_ID=$APP_ID" >> $GITHUB_ENV # Definir a variável de ambiente corretamente    
+          echo "APP_ID=$APP_ID" >> $GITHUB_ENV
 
       - name: Usar o ID da aplicação em outro passo
         run: |

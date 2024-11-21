@@ -40,7 +40,7 @@ on:
 
 jobs:
   login_and_create_app:
-    runs-on: ubuntu-latest
+    using: composite
 
     env:
       API_EMAIL: ${{ secrets.API_EMAIL }}
@@ -62,9 +62,9 @@ jobs:
       - name: Verificar código
         uses: actions/checkout@v2
 
-      - name: Fazer login na API e armazenar token
+      - name: Faz login na API usando e-mail e senha (API_EMAIL e API_PASSWORD)
         run: |
-          # Faz o login na API usando as variáveis de ambiente API_EMAIL e API_PASSWORD
+          echo "Iniciando autenticação"
           response=$(curl -X 'POST' 'https://auth.xguardianplatform.io/login' \
             -H 'accept: application/json' \
             -H 'Content-Type: application/json' \
@@ -81,6 +81,8 @@ jobs:
             echo "Erro: Não foi possível obter o token de autenticação."
             exit 1
           fi
+        shell: bash
+
       - name: Verificar e criar aplicação
         run: |
           CREATE_APP_URL="https://uploader-mvp.xguardianplatform.io/create_app"

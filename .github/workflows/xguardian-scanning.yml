@@ -18,7 +18,7 @@ jobs:
       TEAM_ID: "1"
       SCAN_VERSION: "nome-do-seu-scan"
       FILE_TYPE: "application/zip"
-      UPLOAD_URL: ""
+      UPLOAD_URL: "qualquer-url"
 
     steps:
       - name: Checkout repository

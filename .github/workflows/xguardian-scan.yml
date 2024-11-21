@@ -1,0 +1,27 @@
+name: XGuardian Scan Workflow
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  xguardian-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Execute XGuardian Scanning
+        uses: ./.github/actions/xguardian-scanning
+        with:
+            API_EMAIL: ${{ secrets.API_EMAIL }}
+            API_PASSWORD: ${{ secrets.API_PASSWORD }}
+            API_TOKEN: ${{ secrets.API_TOKEN }}
+            GH_TOKEN: ${{ secrets.GH_TOKEN }}
+            APP_NAME: ${{ github.event.repository.name }}
+            TEAM_ID: "1"
+            SCAN_VERSION: "nome-do-seu-scan"
+            FILE_TYPE: "application/zip"
+            UPLOAD_URL: ""
+        

@@ -15,10 +15,10 @@ jobs:
       API_TOKEN: ${{ secrets.API_TOKEN }}
       GH_TOKEN: ${{ secrets.GH_TOKEN }}
       APP_NAME: ${{ github.event.repository.name }}
-      TEAM_ID: "id-do-seu-time"
+      TEAM_ID: "1"
       SCAN_VERSION: "nome-do-seu-scan"
       FILE_TYPE: "application/zip"
-      UPLOAD_URL: "nome-da-url"
+      UPLOAD_URL: ""
 
     steps:
       - name: Checkout repository

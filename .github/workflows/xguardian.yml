@@ -1,0 +1,27 @@
+name: Run XGuardian Scanning
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  xguardian-scan:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: XGuardian Scanning
+        uses: xmart-xguardian/xguardian-actions@v24.2.1
+        with:
+            API_EMAIL: ${{ secrets.API_EMAIL }}
+            API_PASSWORD: ${{ secrets.API_PASSWORD }}
+            API_TOKEN: ${{ secrets.API_TOKEN }}
+            GH_TOKEN: ${{ secrets.GH_TOKEN }}
+            APP_NAME: 'nome_da_aplicacao_t1'
+            TEAM_ID: 'nome_do_time_t2'
+            SCAN_VERSION: 'nome_da_versao_t3'
+            FILE_TYPE: 'nome_do_tipo_de_arquivo_t4'
+            UPLOAD_URL: 'nome_da_url_t5'

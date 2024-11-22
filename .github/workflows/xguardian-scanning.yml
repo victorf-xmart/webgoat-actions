@@ -208,8 +208,10 @@ jobs:
 
       - name: Upload da aplicação para o scan
         run: |
-          filePath="./${{ env.APP_NAME }}.zip"
+          # Pegando o caminho do arquivo zipado
+          filePath="./${APP_NAME}.zip"
   
-          curl --progress-bar --location --request PUT "${{ env.UPLOAD_URL }}" \
-              --header 'Content-Type: application/zip' \
-              --data-binary "@${filePath}"
+          # Fazendo o upload do arquivo zipado para a URL de upload
+          curl --progress-bar --location --request PUT "${UPLOAD_URL}" \
+            --header 'Content-Type: application/zip' \
+            --data-binary "@${filePath}"

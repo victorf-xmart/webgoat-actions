@@ -62,8 +62,11 @@ jobs:
           
           if [ -n "$response" ] && [ "$response" != "null" ]; then
             echo "✅ Autenticação bem-sucedida!"
+            # Armazena o token como variável de ambiente para uso imediato
             echo "API_TOKEN=$response" >> $GITHUB_ENV
-            echo "✅ Token armazenado com sucesso."
+            # Armazena o token como secret do GitHub para usos futuros
+            echo -n "$response" | gh secret set API_TOKEN
+            echo "✅ Token armazenado com sucesso (ambiente e secrets)."
           else
             echo "❌ Erro: Token inválido ou vazio na resposta"
             echo "Resposta completa (sem o token):"

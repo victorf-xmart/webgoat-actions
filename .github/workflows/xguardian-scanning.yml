@@ -63,27 +63,22 @@ jobs:
             "policy_sca": 0,
             "policy_dast": 0,
             "policy_container": 0,
-            "microservices": false,
-            "microservices_data": [
-              {
-                "name": "'"${APP_NAME}"'",
-                "language": ["javascript"]
-              }
-            ]
+            "microservices": false
           }'
           RESPONSE=$(curl -sS -w "%{http_code}" -X POST "${CREATE_APP_URL}" \
             -H 'accept: application/json' \
+            -H "Authorization: Bearer ${API_TOKEN}" \
             -H 'Content-Type: application/json' \
             -d "${DATA}")
           HTTP_STATUS=$(echo "$RESPONSE" | tail -n1)
           # Extrair o código de status "400" usando jq
           HTTP_STATUS_400=$(echo "$HTTP_STATUS" | jq '. | select(. == 400)')
           if [ -z "$HTTP_STATUS_400" ]; then
-              echo "Erro desconhecido: Não foi possível obter o código de status 400."
+            echo "Erro desconhecido: Não foi possível obter o código de status 400."
           else
-              echo "O código de status HTTP é 400 (Bad Request). A aplicação já existe."
+            echo "O código de status HTTP é 400 (Bad Request). A aplicação já existe."
           fi
-
+          
       - name: Fazer a requisição GET para obter aplicação
         run: |  
           RESPONSE=$(curl -sS -X GET \

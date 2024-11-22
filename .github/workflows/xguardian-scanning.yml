@@ -56,17 +56,22 @@ jobs:
         run: |
           CREATE_APP_URL="https://uploader-mvp.xguardianplatform.io/create_app"
           DATA='{
-            "token": "'"${API_TOKEN}"'",
             "app_name": "'"${APP_NAME}"'",
-            "team_id": ['"${TEAM_ID}"'],
-            "languages": ["insira-a-linguagem"],
-            "description": "insira-a-descricao", 
+            "team_id": ["'"${TEAM_ID}"'"],
+            "languages": ["javascript"],
+            "description": "Application scanned via GitHub Actions",
             "policy": 0,
             "policy_sast": 0,
             "policy_sca": 0,
             "policy_dast": 0,
             "policy_container": 0,
             "microservices": false,
+            "microservices_data": [
+              {
+                "name": "'"${APP_NAME}"'",
+                "language": ["javascript"]
+              }
+            ]
           }'
           RESPONSE=$(curl -sS -w "%{http_code}" -X POST "${CREATE_APP_URL}" \
             -H 'accept: application/json' \
@@ -76,23 +81,24 @@ jobs:
           # Extrair o código de status "400" usando jq
           HTTP_STATUS_400=$(echo "$HTTP_STATUS" | jq '. | select(. == 400)')
           if [ -z "$HTTP_STATUS_400" ]; then
-            echo "Erro desconhecido: Não foi possível obter o código de status 400."
+              echo "Erro desconhecido: Não foi possível obter o código de status 400."
           else
-            echo "O código de status HTTP é 400 (Bad Request). A aplicação já existe."
+              echo "O código de status HTTP é 400 (Bad Request). A aplicação já existe."
           fi
 
       - name: Fazer a requisição GET para obter aplicação
-        run: |
+        run: |  
           RESPONSE=$(curl -sS -X GET \
-            'https://uploader-mvp.xguardianplatform.io/get_apps_total?token='"${API_TOKEN}"'' \
-            -H 'accept: application/json')
+            'https://uploader-mvp.xguardianplatform.io/get_apps_total' \
+            -H 'accept: application/json' \
+            -H "Authorization: Bearer ${API_TOKEN}" )
           # Debug: Print the response structure
           echo "Response structure:"
           echo "$RESPONSE" | jq '.'
-            
+              
           # Try to parse the response and find the app
           APP_ID=$(echo "$RESPONSE" | jq -r --arg NAME "$APP_NAME" '.apps[] | select(.name == $NAME) | .id')
-          
+            
           if [ -z "$APP_ID" ]; then
             echo "Aplicação com nome '${APP_NAME}' não encontrada."
             exit 1

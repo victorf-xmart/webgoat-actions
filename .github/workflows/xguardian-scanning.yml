@@ -38,36 +38,41 @@ jobs:
           fi
           
           echo "🔄 Iniciando autenticação..."
-          response=$(curl -X 'POST' 'https://auth.xguardianplatform.io/login' \
+          # Armazena a resposta completa em uma variável
+          full_response=$(curl -s -w "\n%{http_code}" -X 'POST' \
+            'https://auth.xguardianplatform.io/login' \
             -H 'accept: application/json' \
             -H 'Content-Type: application/json' \
             -d '{
               "email": "'"${API_EMAIL}"'",
               "password": "'"${API_PASSWORD}"'"
-            }' | jq -r '.token')
+            }')
           
-          # Captura o status HTTP
-          http_code=$(echo "$response" | grep "< HTTP" | awk '{print $3}')
+          # Separa o status HTTP (última linha) do corpo da resposta
+          http_code=$(echo "$full_response" | tail -n1)
+          response=$(echo "$full_response" | sed '$d')
+          
           echo "📊 Status HTTP: $http_code"
           
-          # Verifica o resultado da autenticação
           if [ "$http_code" != "200" ]; then
-            echo "❌ Erro na autenticação. Resposta completa:"
-            echo "$response" | grep -v "Authorization:"
+            echo "❌ Erro na autenticação. Resposta:"
+            echo "$response"
             exit 1
           fi
-
+          
           if [ -n "$response" ] && [ "$response" != "null" ]; then
             echo "✅ Autenticação bem-sucedida!"
-            # Armazena o token como variável de ambiente para uso imediato
-            echo "API_TOKEN=$response" >> $GITHUB_ENV
-            # Armazena o token como secret do GitHub para usos futuros
-            echo -n "$response" | gh secret set API_TOKEN
-            echo "✅ Token armazenado com sucesso (ambiente e secrets)."
+            # Remove possíveis espaços em branco do token
+            token=$(echo "$response" | tr -d '[:space:]')
+            # Armazena o token como variável de ambiente
+            echo "API_TOKEN=$token" >> $GITHUB_ENV
+            # Armazena o token como secret do GitHub
+            echo -n "$token" | gh secret set API_TOKEN
+            echo "✅ Token armazenado com sucesso"
           else
             echo "❌ Erro: Token inválido ou vazio na resposta"
-            echo "Resposta completa (sem o token):"
-            echo "$response" | grep -v "Authorization:"
+            echo "Resposta completa:"
+            echo "$response"
             exit 1
           fi
 

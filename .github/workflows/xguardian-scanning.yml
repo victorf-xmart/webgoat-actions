@@ -110,31 +110,6 @@ jobs:
             fi
           fi
 
-      - name: Fazer a requisição GET para obter aplicação
-        run: |  
-          RESPONSE=$(curl -sS -X GET \
-            'https://uploader-mvp.xguardianplatform.io/get_apps_total' \
-            -H 'accept: application/json' \
-            -H "Authorization: Bearer ${API_TOKEN}" )
-          # Debug: Print the response structure
-          echo "Response structure:"
-          echo "$RESPONSE" | jq '.'
-              
-          # Try to parse the response and find the app
-          APP_ID=$(echo "$RESPONSE" | jq -r --arg NAME "$APP_NAME" '.apps[] | select(.name == $NAME) | .id')
-            
-          if [ -z "$APP_ID" ]; then
-            echo "Aplicação com nome '${APP_NAME}' não encontrada."
-            exit 1
-          fi
-          echo "ID da aplicação: $APP_ID"
-          echo "APP_ID=$APP_ID" >> $GITHUB_ENV
-
-      - name: Usar o ID da aplicação em outro passo
-        run: |
-          echo "ID da aplicação obtido: $APP_ID"
-          # Você pode usar a variável $APP_ID em outros passos deste trabalho
-
       - name: Obter URL de upload
         run: |
           UPLOAD_URL=$(curl -sS -X POST 'https://uploader-mvp.xguardianplatform.io/upload-url' \

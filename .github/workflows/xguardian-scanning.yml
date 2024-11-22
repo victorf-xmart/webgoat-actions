@@ -10,14 +10,9 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      API_EMAIL: ${{ secrets.API_EMAIL }}
-      API_PASSWORD: ${{ secrets.API_PASSWORD }}
+      APP_NAME: ${{ github.event.repository.name }}
       API_TOKEN: ${{ secrets.API_TOKEN }}
       GH_TOKEN: ${{ secrets.GH_TOKEN }}
-      APP_NAME: ${{ github.event.repository.name }}
-      TEAM_ID: "1"
-      SCAN_VERSION: ${{ github.sha }}
-      FILE_TYPE: "application/zip"
 
     steps:
       - name: Configurar Node.js

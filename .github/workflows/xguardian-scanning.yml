@@ -50,7 +50,7 @@ jobs:
             exit 1
           fi
 
-      - name: Verificar e criar aplicação
+      - name: Verificar se a aplicação existe, caso contrário, cria a aplicação
         run: |
           CREATE_APP_URL="https://uploader-mvp.xguardianplatform.io/create_app"
           DATA='{

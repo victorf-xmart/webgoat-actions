@@ -113,7 +113,7 @@ jobs:
       - name: Obter URL de upload
         run: |
           UPLOAD_URL=$(curl -sS -X POST 'https://uploader-mvp.xguardianplatform.io/upload-url' \
-            -H 'accept: application/json' \
+              -H 'accept: application/json' \
               -H 'Content-Type: application/json' \
               -d '{
                 "token": "'"${API_TOKEN}"'",
@@ -124,7 +124,7 @@ jobs:
                 "sast": "true" 
               }' | jq -r '.url')
           echo "URL de Upload: ${UPLOAD_URL}"
-          echo "UPLOAD_URL=${UPLOAD_URL}" >> $GITHUB_ENV   
+          echo "UPLOAD_URL=${UPLOAD_URL}" >> $GITHUB_ENV
 
       - name: Zip files
         run: |
@@ -135,5 +135,5 @@ jobs:
           filePath="./${{ env.APP_NAME }}.zip"
   
           curl --progress-bar --location --request PUT "${{ env.UPLOAD_URL }}" \
-            --header 'Content-Type: application/zip' \
-            --data-binary "@${filePath}"
+              --header 'Content-Type: application/zip' \
+              --data-binary "@${filePath}"

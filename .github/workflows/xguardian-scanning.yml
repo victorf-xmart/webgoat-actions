@@ -91,9 +91,11 @@ jobs:
                 -H "Authorization: Bearer ${API_TOKEN}" )
               
               APP_ID=$(echo "$EXISTING_APP" | jq -r --arg NAME "$APP_NAME" '.[] | select(.name == $NAME) | .id')
-              
+
               if [ -n "$APP_ID" ]; then
-                echo "APP_ID encontrado: $APP_ID"
+                echo "APP_ID encontrado: $APP_ID para a aplicação: $APP_NAME"
+                echo "Detalhes da aplicação:"
+                echo "$EXISTING_APP" | jq --arg NAME "$APP_NAME" '.[] | select(.name == $NAME)'
                 echo "APP_ID=$APP_ID" >> $GITHUB_ENV
               else
                 echo "Aviso: Não foi possível encontrar o APP_ID da aplicação existente"

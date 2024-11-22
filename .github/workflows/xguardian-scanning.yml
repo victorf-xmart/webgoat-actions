@@ -81,7 +81,22 @@ jobs:
             # Verificar se é erro 400 (app já existe)
             ERROR_STATUS=$(echo "$RESPONSE" | jq -r '.status // empty')
             if [ "$ERROR_STATUS" = "400" ]; then
-              echo "A aplicação já existe. Continuando com o próximo passo..."
+              echo "A aplicação já existe. Buscando o APP_ID existente..."
+              # Buscar o APP_ID da aplicação existente
+              EXISTING_APP=$(curl -sS -X GET \
+                'https://uploader-mvp.xguardianplatform.io/get_apps_total' \
+                -H 'accept: application/json' \
+                -H "Authorization: Bearer ${API_TOKEN}" )
+              
+              APP_ID=$(echo "$EXISTING_APP" | jq -r --arg NAME "$APP_NAME" '.apps[] | select(.name == $NAME) | .id')
+              
+              if [ -n "$APP_ID" ]; then
+                echo "APP_ID encontrado: $APP_ID"
+                echo "APP_ID=$APP_ID" >> $GITHUB_ENV
+              else
+                echo "Erro: Não foi possível encontrar o APP_ID da aplicação existente"
+                exit 1
+              fi
             else
               echo "Erro na criação da aplicação:"
               echo "$RESPONSE"

@@ -29,6 +29,9 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Fazer login na API e armazenar o token
+        env:
+          API_EMAIL: ${{ secrets.API_EMAIL }}
+          API_PASSWORD: ${{ secrets.API_PASSWORD }}
         run: |
           # Faz o login na API usando as variáveis de ambiente API_EMAIL e API_PASSWORD
           response=$(curl -X 'POST' 'https://auth.xguardianplatform.io/login' \

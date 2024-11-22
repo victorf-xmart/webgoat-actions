@@ -155,21 +155,48 @@ jobs:
           fi
 
       - name: Obter URL de upload
+        env:
+          # Define se vai ser feito o scan de SAST e SCA
+          SAST: true
+          SCA: true
+
+          # Define se o relatório será traduzido para o português do Brasil
+          TRANSLATE: false
+
+          # Define se vai ser excluido algum diretório ou arquivo do scan
+          EXCLUDE: ".js, .tar, .py"
+          
+          # Define se o relatório será gerado em PDF detalhado
+          PDF: "false"
+
+          # Configurações de microserviços
+          MICRO_ID: 0
+          MICROSERVICES: false
+
+          FILE_TYPE: "application/zip-compressed"
+          SCAN_VERSION: ${{ github.sha }}
         run: |
+          DATA=$(cat << EOF
+          {
+            "app_id": "${APP_ID}",
+            "scan_version": "${SCAN_VERSION}",
+            "exclude": "${EXCLUDE}",
+            "file_type": "${FILE_TYPE}",
+            "micro_id": ${MICRO_ID},
+            "microservices": ${MICROSERVICES},
+            "pdf": ${PDF},
+            "sast": ${SAST},
+            "sca": ${SCA},
+            "translate": ${TRANSLATE}
+          }
+          EOF
+          )
+
           UPLOAD_URL=$(curl -sS -X POST 'https://uploader-mvp.xguardianplatform.io/upload-url' \
               -H 'accept: application/json' \
               -H 'Content-Type: application/json' \
               -H "Authorization: Bearer ${API_TOKEN}" \
-              -d '{
-                "app_id": '"${APP_ID}"',
-                "scan_version": "'"${SCAN_VERSION}"'",
-                "file_type": "'"${FILE_TYPE}"'",
-                "sca": "true",
-                "sast": "true",
-                "translate": "false",
-                "exclude": "",
-                "pdf": "false"
-              }' | jq -r '.url')
+              -d "${DATA}" | jq -r '.url')
           
           if [ -z "$UPLOAD_URL" ] || [ "$UPLOAD_URL" = "null" ]; then
             echo "Erro: Não foi possível obter a URL de upload"

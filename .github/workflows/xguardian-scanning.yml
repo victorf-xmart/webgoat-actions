@@ -128,8 +128,8 @@ jobs:
 
       - name: Zip files
         run: |
-          zip -r "${APP_NAME}.zip" .
-          
+          zip -r "${APP_NAME}.zip" . -x "*.git*" "*node_modules*" "*.env*"
+
       - name: Upload da aplicação para o scan
         run: |
           filePath="./${{ env.APP_NAME }}.zip"

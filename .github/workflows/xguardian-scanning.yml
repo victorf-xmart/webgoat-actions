@@ -115,14 +115,23 @@ jobs:
           UPLOAD_URL=$(curl -sS -X POST 'https://uploader-mvp.xguardianplatform.io/upload-url' \
               -H 'accept: application/json' \
               -H 'Content-Type: application/json' \
+              -H "Authorization: Bearer ${API_TOKEN}" \
               -d '{
-                "token": "'"${API_TOKEN}"'",
-                "app_id": "'"${APP_ID}"'",
+                "app_id": '"${APP_ID}"',
                 "scan_version": "'"${SCAN_VERSION}"'",
                 "file_type": "'"${FILE_TYPE}"'",
-                "sca": "true", 
-                "sast": "true" 
+                "sca": "true",
+                "sast": "true",
+                "translate": "false",
+                "exclude": "",
+                "pdf": "false"
               }' | jq -r '.url')
+          
+          if [ -z "$UPLOAD_URL" ] || [ "$UPLOAD_URL" = "null" ]; then
+            echo "Erro: Não foi possível obter a URL de upload"
+            exit 1
+          fi
+          
           echo "URL de Upload: ${UPLOAD_URL}"
           echo "UPLOAD_URL=${UPLOAD_URL}" >> $GITHUB_ENV
 

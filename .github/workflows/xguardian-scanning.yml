@@ -33,7 +33,21 @@ jobs:
           API_EMAIL: ${{ secrets.API_EMAIL }}
           API_PASSWORD: ${{ secrets.API_PASSWORD }}
         run: |
-          # Faz o login na API usando as variáveis de ambiente API_EMAIL e API_PASSWORD
+          # Tenta usar o token existente primeiro
+          if [ -n "$API_TOKEN" ]; then
+            # Testa se o token ainda é válido com uma chamada à API
+            TEST_RESPONSE=$(curl -sS -X GET 'https://uploader-mvp.xguardianplatform.io/get_apps_total' \
+              -H "Authorization: Bearer ${API_TOKEN}" \
+              -w "%{http_code}")
+            
+            if [[ "$TEST_RESPONSE" == *"200"* ]]; then
+              echo "Token existente ainda é válido."
+              echo "API_TOKEN=$API_TOKEN" >> $GITHUB_ENV
+              return 0
+            fi
+          fi
+
+          # Se chegou aqui, precisa gerar um novo token
           response=$(curl -X 'POST' 'https://auth.xguardianplatform.io/login' \
             -H 'accept: application/json' \
             -H 'Content-Type: application/json' \
@@ -46,7 +60,8 @@ jobs:
           if [ -n "$response" ] && [ "$response" != "null" ]; then
             # Armazena o token como um segredo no GitHub Actions usando echo e gh
             echo -n "$response" | gh secret set API_TOKEN
-            echo "Token armazenado com sucesso."
+            echo "API_TOKEN=$response" >> $GITHUB_ENV
+            echo "Token atualizado com sucesso."
           else
             echo "Erro: Não foi possível obter o token de autenticação."
             exit 1

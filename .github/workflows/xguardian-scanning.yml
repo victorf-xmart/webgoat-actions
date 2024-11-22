@@ -31,24 +31,43 @@ jobs:
 
       - name: Fazer login na API e armazenar o token
         run: |
-          echo "API_EMAIL: $API_EMAIL"
-          echo "API_PASSWORD: $API_PASSWORD"
-          echo "Iniciando autenticação..."
-          response=$(curl -X 'POST' 'https://auth.xguardianplatform.io/login' \
+          echo "Verificando credenciais..."
+          if [ -z "$API_EMAIL" ] || [ -z "$API_PASSWORD" ]; then
+            echo "❌ Erro: API_EMAIL ou API_PASSWORD não estão definidos"
+            exit 1
+          fi
+          
+          echo "🔄 Iniciando autenticação..."
+          full_response=$(curl -v -X 'POST' 'https://auth.xguardianplatform.io/login' \
             -H 'accept: application/json' \
             -H 'Content-Type: application/json' \
             -d '{
               "email": "'"${API_EMAIL}"'",
               "password": "'"${API_PASSWORD}"'"
-            }' | jq -r '.token')
-          echo "Token: $response"
-          # Verifica se o token foi obtido com sucesso
+            }' 2>&1)
+          
+          # Captura o status HTTP
+          http_code=$(echo "$full_response" | grep "< HTTP" | awk '{print $3}')
+          echo "📊 Status HTTP: $http_code"
+          
+          # Extrai apenas o token da resposta
+          response=$(echo "$full_response" | grep -v "< " | grep -v "> " | jq -r '.token')
+          
+          # Verifica o resultado da autenticação
+          if [ "$http_code" != "200" ]; then
+            echo "❌ Erro na autenticação. Resposta completa:"
+            echo "$full_response" | grep -v "Authorization:"
+            exit 1
+          fi
+          
           if [ -n "$response" ] && [ "$response" != "null" ]; then
-            # Armazena o token como secrets no GitHub Actions usando echo e gh
-            echo -n "$response" | gh secret set API_TOKEN
-            echo "Token armazenado com sucesso."
+            echo "✅ Autenticação bem-sucedida!"
+            echo "API_TOKEN=$response" >> $GITHUB_ENV
+            echo "✅ Token armazenado com sucesso."
           else
-            echo "Erro: Não foi possível obter o token de autenticação."
+            echo "❌ Erro: Token inválido ou vazio na resposta"
+            echo "Resposta completa (sem o token):"
+            echo "$full_response" | grep -v "Authorization:"
             exit 1
           fi
 

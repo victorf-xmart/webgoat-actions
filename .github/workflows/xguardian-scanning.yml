@@ -38,28 +38,25 @@ jobs:
           fi
           
           echo "🔄 Iniciando autenticação..."
-          full_response=$(curl -v -X 'POST' 'https://auth.xguardianplatform.io/login' \
+          response=$(curl -X 'POST' 'https://auth.xguardianplatform.io/login' \
             -H 'accept: application/json' \
             -H 'Content-Type: application/json' \
             -d '{
               "email": "'"${API_EMAIL}"'",
               "password": "'"${API_PASSWORD}"'"
-            }' 2>&1)
+            }' | jq -r '.token')
           
           # Captura o status HTTP
-          http_code=$(echo "$full_response" | grep "< HTTP" | awk '{print $3}')
+          http_code=$(echo "$response" | grep "< HTTP" | awk '{print $3}')
           echo "📊 Status HTTP: $http_code"
-          
-          # Extrai apenas o token da resposta
-          response=$(echo "$full_response" | grep -v "< " | grep -v "> " | jq -r '.token')
           
           # Verifica o resultado da autenticação
           if [ "$http_code" != "200" ]; then
             echo "❌ Erro na autenticação. Resposta completa:"
-            echo "$full_response" | grep -v "Authorization:"
+            echo "$response" | grep -v "Authorization:"
             exit 1
           fi
-          
+
           if [ -n "$response" ] && [ "$response" != "null" ]; then
             echo "✅ Autenticação bem-sucedida!"
             # Armazena o token como variável de ambiente para uso imediato
@@ -70,7 +67,7 @@ jobs:
           else
             echo "❌ Erro: Token inválido ou vazio na resposta"
             echo "Resposta completa (sem o token):"
-            echo "$full_response" | grep -v "Authorization:"
+            echo "$response" | grep -v "Authorization:"
             exit 1
           fi
 

@@ -36,9 +36,9 @@ jobs:
               -w "%{http_code}")
             
             if [[ "$TEST_RESPONSE" == *"200"* ]]; then
-              echo "Token existente ainda eh valido."
+              echo "Token existente ainda é válido."
               echo "API_TOKEN=$API_TOKEN" >> $GITHUB_ENV
-              return 0
+              continue
             fi
           fi
 

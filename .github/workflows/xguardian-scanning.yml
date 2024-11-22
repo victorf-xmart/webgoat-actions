@@ -68,20 +68,47 @@ jobs:
           fi
 
       - name: Verificar se a aplicação existe, caso contrário, cria a aplicação
+        env:
+          # Atribui as equipes baseado no ID(s) da(s) equipe(s)
+          TEAM_ID: '[1,36]'
+
+          # Define as linguagens da aplicação
+          LANGUAGES: '["JavaScript", "TypeScript", "Python"]'
+          
+          # Define a descrição da aplicação
+          DESCRIPTION: "Application scanned via GitHub Actions" 
+
+          # ID das políticas de SAST, SCA, DAST e Container
+          POLICY_SAST: 0
+          POLICY_SCA: 0
+          POLICY_DAST: 0
+          POLICY_CONTAINER: 0
+
+          # Possui microserviços?
+          MICROSERVICES: false # Altere para true caso possua microserviços
+          MICROSERVICES_DATA: '[{"name": "MS1", "language": ["JavaScript"]}, {"name": "MS2", "language": ["TypeScript"]}, {"name": "MS3", "language": ["Python"]}]'
+
         run: |
-          CREATE_APP_URL="https://uploader-mvp.xguardianplatform.io/create_app"
-          DATA='{
-            "app_name": "'"${APP_NAME}"'",
-            "team_id": ["'"${TEAM_ID}"'"],
-            "languages": ["javascript"],
-            "description": "Application scanned via GitHub Actions",
+          DATA=$(cat << EOF
+          {
+            "app_name": "${APP_NAME}",
+            "team_id": ${TEAM_ID},
+            "languages": ${LANGUAGES},
+            "description": "${DESCRIPTION}",
             "policy": 0,
-            "policy_sast": 0,
-            "policy_sca": 0,
-            "policy_dast": 0,
-            "policy_container": 0,
-            "microservices": false
-          }'
+            "policy_sast": ${POLICY_SAST},
+            "policy_sca": ${POLICY_SCA},
+            "policy_dast": ${POLICY_DAST},
+            "policy_container": ${POLICY_CONTAINER},
+            "microservices": $([[ "${MICROSERVICES}" == "true" ]] && echo "true" || echo "false")
+            $([[ "${MICROSERVICES}" == "true" ]] && echo ',
+            "microservices_data": ${MICROSERVICES_DATA}')
+          }
+          EOF
+          )
+
+          CREATE_APP_URL="https://uploader-mvp.xguardianplatform.io/create_app"
+          
           RESPONSE=$(curl -sS -X POST "${CREATE_APP_URL}" \
             -H 'accept: application/json' \
             -H "Authorization: Bearer ${API_TOKEN}" \

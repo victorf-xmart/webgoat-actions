@@ -16,9 +16,8 @@ jobs:
       GH_TOKEN: ${{ secrets.GH_TOKEN }}
       APP_NAME: ${{ github.event.repository.name }}
       TEAM_ID: "1"
-      SCAN_VERSION: "nome-do-seu-scan"
+      SCAN_VERSION: ${{ github.sha }}
       FILE_TYPE: "application/zip"
-      UPLOAD_URL: "qualquer-url"
 
     steps:
       - name: Configurar Node.js

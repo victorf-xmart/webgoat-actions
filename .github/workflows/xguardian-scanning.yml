@@ -169,7 +169,7 @@ jobs:
           TRANSLATE: "false"
 
           # Define se vai ser excluido algum diretório ou arquivo do scan
-          EXCLUDE: '".gz", ".tar", ".tar.gz", ".log", ".tmp", ".bin", ".zip"'
+          EXCLUDE: ""
           
           # Define se o relatório será gerado em PDF detalhado
           PDF: "false"

@@ -162,11 +162,11 @@ jobs:
       - name: Obter URL de upload
         env:
           # Define se vai ser feito o scan de SAST e SCA
-          SAST: true
-          SCA: true
+          SAST: "true"
+          SCA: "true"
 
           # Define se o relatório será traduzido para o português do Brasil
-          TRANSLATE: false
+          TRANSLATE: "false"
 
           # Define se vai ser excluido algum diretório ou arquivo do scan
           EXCLUDE: ".js, .tar, .py"
@@ -176,42 +176,49 @@ jobs:
 
           # Configurações de microserviços
           MICRO_ID: 0
-          MICROSERVICES: false
+          MICROSERVICES: "false"
 
-          FILE_TYPE: "application/zip-compressed"
-          SCAN_VERSION: "${APP_NAME}${GH_SHA:0:6}"
+          FILE_TYPE: "application/zip"
+          SCAN_VERSION: ${{ format('{0}{1}', github.event.repository.name, steps.vars.outputs.short_sha) }}
         run: |
           echo "Debug: SCAN_VERSION: ${SCAN_VERSION}"
 
+          UPLOAD_URL="https://uploader-mvp.xguardianplatform.io/upload-url"
+
           DATA=$(cat << EOF
           {
-            "app_id": "${APP_ID}",
+            "app_id": ${APP_ID},
             "scan_version": "${SCAN_VERSION}",
-            "exclude": "${EXCLUDE}",
             "file_type": "${FILE_TYPE}",
-            "micro_id": ${MICRO_ID},
-            "microservices": ${MICROSERVICES},
-            "pdf": ${PDF},
-            "sast": ${SAST},
-            "sca": ${SCA},
-            "translate": ${TRANSLATE}
+            "sca": "${SCA}",
+            "sast": "${SAST}",
+            "translate": "${TRANSLATE}",
+            "exclude": "${EXCLUDE}",
+            "pdf": "${PDF}"
           }
           EOF
           )
 
-          UPLOAD_URL=$(curl -sS -X POST 'https://uploader-mvp.xguardianplatform.io/upload-url' \
+          # Debug do payload formatado
+          echo "Debug: DATA (formatted):"
+          echo "${DATA}" | jq '.'
+          
+          # Debug do payload original
+          echo "Debug: DATA (raw): ${DATA}"
+
+          GET_UPLOAD_URL=$(curl -sS -X POST "${UPLOAD_URL}" \
               -H 'accept: application/json' \
               -H 'Content-Type: application/json' \
               -H "Authorization: Bearer ${API_TOKEN}" \
               -d "${DATA}" | jq -r '.url')
           
-          if [ -z "$UPLOAD_URL" ] || [ "$UPLOAD_URL" = "null" ]; then
+          if [ -z "$GET_UPLOAD_URL" ] || [ "$GET_UPLOAD_URL" = "null" ]; then
             echo "Erro: Não foi possível obter a URL de upload"
             exit 1
           fi
           
-          echo "URL de Upload: ${UPLOAD_URL}"
-          echo "UPLOAD_URL=${UPLOAD_URL}" >> $GITHUB_ENV
+          echo "URL de Upload: ${GET_UPLOAD_URL}"
+          echo "GET_UPLOAD_URL=${GET_UPLOAD_URL}" >> $GITHUB_ENV
 
       - name: Zipar os arquivos
         run: |
@@ -222,8 +229,11 @@ jobs:
         run: |
           # Pegando o caminho do arquivo zipado
           filePath="./${APP_NAME}.zip"
-  
+          
+          # A URL já deve vir pronta para uso do endpoint anterior
+          echo "Debug: Upload URL: ${GET_UPLOAD_URL}"
+          
           # Fazendo o upload do arquivo zipado para a URL de upload
-          curl --progress-bar --location --request PUT "${UPLOAD_URL}" \
+          curl --progress-bar --location --request PUT "${GET_UPLOAD_URL}" \
             --header 'Content-Type: application/zip' \
             --data-binary "@${filePath}"

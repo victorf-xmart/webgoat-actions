@@ -237,3 +237,4 @@ jobs:
           curl --progress-bar --location --request PUT "${GET_UPLOAD_URL}" \
             --header 'Content-Type: application/zip' \
             --data-binary "@${filePath}"
+            

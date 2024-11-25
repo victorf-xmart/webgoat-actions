@@ -154,6 +154,11 @@ jobs:
             fi
           fi
 
+      - name: Obter o short_sha
+        id: vars
+        run: |
+          echo "short_sha=${GH_SHA:0:6}" >> $GITHUB_OUTPUT
+
       - name: Obter URL de upload
         env:
           # Define se vai ser feito o scan de SAST e SCA

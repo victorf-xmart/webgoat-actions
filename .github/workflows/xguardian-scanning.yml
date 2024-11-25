@@ -11,6 +11,7 @@ jobs:
 
     env:
       APP_NAME: ${{ github.event.repository.name }}
+      GH_SHA: ${{ github.sha }}
       API_TOKEN: ${{ secrets.API_TOKEN }}
       GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
@@ -169,8 +170,10 @@ jobs:
           MICROSERVICES: false
 
           FILE_TYPE: "application/zip-compressed"
-          SCAN_VERSION: ${{ github.sha }}
+          SCAN_VERSION: "${APP_NAME}${GH_SHA:0:6}"
         run: |
+          echo "Debug: SCAN_VERSION: ${SCAN_VERSION}"
+
           DATA=$(cat << EOF
           {
             "app_id": "${APP_ID}",

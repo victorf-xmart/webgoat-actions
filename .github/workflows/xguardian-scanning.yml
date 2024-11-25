@@ -29,6 +29,10 @@ jobs:
           API_EMAIL: ${{ secrets.API_EMAIL }}
           API_PASSWORD: ${{ secrets.API_PASSWORD }}
         run: |
+          echo "Debug: API_EMAIL: ${API_EMAIL}"
+          echo "Debug: API_PASSWORD: ${API_PASSWORD}"
+          echo "Debug: API_TOKEN: ${API_TOKEN}"
+
           # Tenta usar o token existente primeiro
           if [ -n "$API_TOKEN" ]; then
             # Testa se o token ainda é válido com uma chamada à API
